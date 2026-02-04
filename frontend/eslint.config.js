@@ -1,9 +1,9 @@
-const js = require('@eslint/js');
-const reactPlugin = require('eslint-plugin-react');
-const reactHooksPlugin = require('eslint-plugin-react-hooks');
-const tseslint = require('typescript-eslint');
+import js from '@eslint/js';
+import reactPlugin from 'eslint-plugin-react';
+import reactHooksPlugin from 'eslint-plugin-react-hooks';
+import tseslint from 'typescript-eslint';
 
-module.exports = [
+export default [
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
