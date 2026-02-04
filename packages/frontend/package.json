@@ -23,6 +23,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@academic/backend": "workspace:*",
     "@eslint/js": "^9.19.0",
     "@types/react": "^19.0.6",
     "@types/react-dom": "^19.0.2",

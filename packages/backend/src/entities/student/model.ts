@@ -1,5 +1,3 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
 import { pgTable, uuid, varchar, timestamp, integer } from 'drizzle-orm/pg-core';
 
 // Student table definition

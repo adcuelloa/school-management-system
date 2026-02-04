@@ -1,7 +1,5 @@
 import { initTRPC } from '@trpc/server';
 import { studentService } from './service.js';
-import { studentSchema } from '@academic/common';
-import { z } from 'zod';
 
 const t = initTRPC.create();
 

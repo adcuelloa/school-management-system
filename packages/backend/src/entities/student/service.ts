@@ -1,11 +1,11 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-import { students, type StudentRecord } from './model.js';
 import type { Student } from '@academic/common';
 
-const connectionString = process.env.DATABASE_URL || 'postgresql://admin:admin123@localhost:5432/academic_db';
-const client = postgres(connectionString);
-export const db = drizzle(client);
+// Commented out to avoid issues in environments without a running DB
+// import { drizzle } from 'drizzle-orm/postgres-js';
+// import postgres from 'postgres';
+// const connectionString = process.env.DATABASE_URL || 'postgresql://admin:admin123@localhost:5432/academic_db';
+// const client = postgres(connectionString);
+// export const db = drizzle(client);
 
 export class StudentService {
   async list(): Promise<Student[]> {
