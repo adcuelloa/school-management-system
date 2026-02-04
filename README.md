@@ -5,11 +5,13 @@ A modern school management system built with TypeScript, tRPC, React 19, and Dri
 ## Tech Stack
 
 ### Monorepo
+
 - **Package Manager**: pnpm 10.x
 - **Build System**: Turborepo 2.8.x
 - **Runtime**: Node.js >=24.13.0
 
 ### Backend
+
 - **Framework**: Express
 - **API Layer**: tRPC for end-to-end type safety
 - **Database**: PostgreSQL 18.1 (via Docker)
@@ -18,6 +20,7 @@ A modern school management system built with TypeScript, tRPC, React 19, and Dri
 - **Runtime**: Node.js with TypeScript
 
 ### Frontend
+
 - **Framework**: React 19
 - **Build Tool**: Vite
 - **State Management**: TanStack Query (React Query)
@@ -26,6 +29,7 @@ A modern school management system built with TypeScript, tRPC, React 19, and Dri
 - **Type Safety**: End-to-end via tRPC
 
 ### Shared
+
 - **Type System**: TypeScript 5.9.x
 - **Schema Validation**: Zod
 - **Code Quality**: ESLint + Prettier
@@ -67,27 +71,31 @@ academic-management-system/
 ### Installation
 
 1. **Install dependencies**:
+
    ```bash
    pnpm install
    ```
 
 2. **Start infrastructure (PostgreSQL)**:
+
    ```bash
    pnpm infra:up
    ```
 
 3. **Run development servers**:
-   
+
    Run all services:
+
    ```bash
    pnpm dev
    ```
-   
+
    Or run individually:
+
    ```bash
    # Backend only (port 4000)
    pnpm dev:backend
-   
+
    # Frontend only (port 3000)
    pnpm dev:frontend
    ```
@@ -144,13 +152,16 @@ pnpm infra:logs       # View Docker logs
 ## Features
 
 ### End-to-End Type Safety
+
 - Shared Zod schemas in `packages/common`
 - TypeScript types inferred from Zod schemas
 - tRPC provides compile-time type safety from backend to frontend
 - No manual type synchronization needed
 
 ### Package-by-Entity Architecture
+
 Backend code is organized by entity (e.g., `student`):
+
 ```
 entities/student/
 ├── model.ts      # Drizzle ORM table definition
@@ -159,6 +170,7 @@ entities/student/
 ```
 
 ### Database Schema
+
 - Drizzle ORM for type-safe database queries
 - PostgreSQL 18.1 running in Docker
 - Schema migrations via Drizzle Kit
@@ -194,6 +206,7 @@ DATABASE_URL=postgresql://admin:admin123@localhost:5432/academic_db
 5. **Use in frontend** with full type safety via the tRPC client
 
 Example:
+
 ```typescript
 // In frontend components
 import { trpc } from './App';
@@ -208,6 +221,7 @@ function MyComponent() {
 ## Package Dependencies
 
 Packages reference each other using workspace protocol:
+
 ```json
 {
   "dependencies": {

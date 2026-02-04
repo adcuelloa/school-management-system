@@ -3,7 +3,16 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink } from '@trpc/client';
 import { createTRPCReact } from '@trpc/react-query';
 import type { AppRouter } from '@academic/backend';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 import type { Student } from '@academic/common';
 
 // Create tRPC React hooks
@@ -50,31 +59,40 @@ function StudentDashboard() {
   }
 
   // Prepare chart data - count students by grade
-  const gradeData = students.reduce((acc, student) => {
-    const existing = acc.find((item) => item.grade === student.grade);
-    if (existing) {
-      existing.count += 1;
-    } else {
-      acc.push({ grade: student.grade, count: 1 });
-    }
-    return acc;
-  }, [] as { grade: number; count: number }[]);
+  const gradeData = students.reduce(
+    (acc, student) => {
+      const existing = acc.find((item) => item.grade === student.grade);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        acc.push({ grade: student.grade, count: 1 });
+      }
+      return acc;
+    },
+    [] as { grade: number; count: number }[]
+  );
 
   gradeData.sort((a, b) => a.grade - b.grade);
 
   return (
     <div>
       <h2>Student Overview</h2>
-      
+
       <div style={{ marginBottom: '40px' }}>
         <h3>Student List ({students.length} students)</h3>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ backgroundColor: '#f0f0f0' }}>
               <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #ddd' }}>Name</th>
-              <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #ddd' }}>Email</th>
-              <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #ddd' }}>Grade</th>
-              <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #ddd' }}>Status</th>
+              <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #ddd' }}>
+                Email
+              </th>
+              <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #ddd' }}>
+                Grade
+              </th>
+              <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #ddd' }}>
+                Status
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -86,12 +104,14 @@ function StudentDashboard() {
                 <td style={{ padding: '10px', border: '1px solid #ddd' }}>{student.email}</td>
                 <td style={{ padding: '10px', border: '1px solid #ddd' }}>{student.grade}</td>
                 <td style={{ padding: '10px', border: '1px solid #ddd' }}>
-                  <span style={{ 
-                    padding: '2px 8px', 
-                    borderRadius: '4px', 
-                    backgroundColor: student.status === 'active' ? '#e8f5e9' : '#fff3e0',
-                    color: student.status === 'active' ? '#2e7d32' : '#e65100'
-                  }}>
+                  <span
+                    style={{
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      backgroundColor: student.status === 'active' ? '#e8f5e9' : '#fff3e0',
+                      color: student.status === 'active' ? '#2e7d32' : '#e65100',
+                    }}
+                  >
                     {student.status}
                   </span>
                 </td>
@@ -106,7 +126,10 @@ function StudentDashboard() {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={gradeData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="grade" label={{ value: 'Grade', position: 'insideBottom', offset: -5 }} />
+            <XAxis
+              dataKey="grade"
+              label={{ value: 'Grade', position: 'insideBottom', offset: -5 }}
+            />
             <YAxis label={{ value: 'Number of Students', angle: -90, position: 'insideLeft' }} />
             <Tooltip />
             <Legend />
