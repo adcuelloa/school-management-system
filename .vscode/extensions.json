@@ -1,0 +1,24 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "editorconfig.editorconfig",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-json",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "typescript-eslint.typescript-eslint",
+    "mikestead.dotenv",
+    "usernamehw.errorlens",
+    "miguelsolorio.fluent-icons",
+    "zhuangtongfa.material-theme",
+    "miguelsolorio.symbols",
+    "clinyong.vscode-css-modules",
+    "heybourn.headwind",
+    "wix.vscode-import-cost",
+    "yzhang.markdown-all-in-one",
+    "postman.postman-for-vscode",
+    "ms-ossdata.vscode-pgsql",
+    "christian-kohler.npm-intellisense"
+  ]
+}

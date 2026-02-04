@@ -1,4 +1,7 @@
 packages:
-  - 'packages/*'
-  - 'backend'
-  - 'frontend'
+  - packages/*
+  - backend
+  - frontend
+
+onlyBuiltDependencies:
+  - unrs-resolver

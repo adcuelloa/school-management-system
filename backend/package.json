@@ -12,16 +12,27 @@
     }
   },
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch src/server.ts",
+    "dev:inspect": "tsx watch --inspect src/server.ts",
     "build": "tsup",
-    "start": "node dist/index.js",
-    "clean": "rm -rf dist",
-    "lint": "eslint src",
     "type-check": "tsc --noEmit",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:intro": "tsx node_modules/drizzle-kit/bin.cjs introspect",
+    "db:generate": "tsx node_modules/drizzle-kit/bin.cjs generate",
+    "db:migrate": "tsx node_modules/drizzle-kit/bin.cjs migrate",
+    "db:push": "tsx node_modules/drizzle-kit/bin.cjs push",
+    "db:studio": "tsx node_modules/drizzle-kit/bin.cjs studio",
+    "db:reset": "../scripts/db-init.sh",
+    "logs:clear": "rm -rf logs/*.log",
+    "clean": "pnpm run logs:clear && rm -rf node_modules dist tsconfig.tsbuildinfo",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "lint:check": "eslint . --quiet",
+    "format": "prettier --write \"**/*.{js,ts,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,ts,json,md}\"",
+    "code:check": "pnpm run lint:check && pnpm run format:check",
+    "code:fix": "pnpm run lint:fix && pnpm run format",
+    "test": "vitest",
+    "test:watch": "vitest --watch"
   },
   "dependencies": {
     "@academic/common": "workspace:*",
@@ -29,6 +40,7 @@
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.1",
     "express": "^5.2.1",
+    "pg": "^8.18.0",
     "postgres": "^3.4.5",
     "zod": "^4.3.6"
   },
@@ -36,9 +48,13 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.6",
     "@types/node": "^25.2.0",
+    "@types/pg": "^8.16.0",
     "drizzle-kit": "^0.31.8",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-security": "^3.0.1",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "winston": "^3.19.0"
   }
 }

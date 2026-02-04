@@ -1,6 +1,6 @@
 # Academic Management System
 
-A modern school management system built with TypeScript, tRPC, React 19, and Drizzle ORM in a pnpm + Turborepo monorepo.
+A modern school management system built with TypeScript, Express REST API, React 19, and Drizzle ORM in a pnpm + Turborepo monorepo.
 
 ## Tech Stack
 
@@ -13,7 +13,7 @@ A modern school management system built with TypeScript, tRPC, React 19, and Dri
 ### Backend
 
 - **Framework**: Express
-- **API Layer**: tRPC for end-to-end type safety
+- **API Layer**: REST API with Express routers
 - **Database**: PostgreSQL 18.1 (via Docker)
 - **ORM**: Drizzle ORM
 - **Build Tool**: tsup
@@ -24,9 +24,10 @@ A modern school management system built with TypeScript, tRPC, React 19, and Dri
 - **Framework**: React 19
 - **Build Tool**: Vite
 - **State Management**: TanStack Query (React Query)
+- **HTTP Client**: axios
 - **Forms**: react-hook-form with Zod validation
 - **Charts**: Recharts
-- **Type Safety**: End-to-end via tRPC
+- **Type Safety**: TypeScript with shared Zod schemas
 
 ### Shared
 
@@ -37,10 +38,10 @@ A modern school management system built with TypeScript, tRPC, React 19, and Dri
 ## Project Structure
 
 ```
-academic-management-system/
+school-management-system/
 ├── packages/
 │   ├── common/              # Shared types and schemas (Zod)
-│   ├── backend/             # Express + tRPC API server
+│   ├── backend/             # Express REST API server
 │   │   └── src/
 │   │       ├── entities/    # Package-by-entity architecture
 │   │       │   └── student/ # Student entity (model, service, router)
@@ -48,7 +49,7 @@ academic-management-system/
 │   │       └── index.ts     # Entry point
 │   └── frontend/            # React 19 + Vite frontend
 │       └── src/
-│           ├── App.tsx      # Main app with tRPC client
+│           ├── App.tsx      # Main app with axios client
 │           └── main.tsx     # Entry point
 ├── infra/
 │   ├── docker-compose.dev.yml  # PostgreSQL + pgAdmin
@@ -93,18 +94,18 @@ academic-management-system/
    Or run individually:
 
    ```bash
-   # Backend only (port 4000)
+   # Backend only (port 3000)
    pnpm dev:backend
 
-   # Frontend only (port 3000)
+   # Frontend only (port 5174)
    pnpm dev:frontend
    ```
 
 4. **Access the application**:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:4000
-   - Health Check: http://localhost:4000/health
-   - tRPC Endpoint: http://localhost:4000/trpc
+   - Frontend: http://localhost:5174
+   - Backend API: http://localhost:3000
+   - Health Check: http://localhost:3000/health
+   - API Endpoints: http://localhost:3000/api
 
 ### Database Management
 
@@ -151,12 +152,12 @@ pnpm infra:logs       # View Docker logs
 
 ## Features
 
-### End-to-End Type Safety
+### Type Safety
 
 - Shared Zod schemas in `packages/common`
 - TypeScript types inferred from Zod schemas
-- tRPC provides compile-time type safety from backend to frontend
-- No manual type synchronization needed
+- Manual type synchronization between frontend and backend
+- Runtime validation with Zod schemas
 
 ### Package-by-Entity Architecture
 
@@ -166,7 +167,7 @@ Backend code is organized by entity (e.g., `student`):
 entities/student/
 ├── model.ts      # Drizzle ORM table definition
 ├── service.ts    # Business logic
-└── router.ts     # tRPC router endpoints
+└── router.ts     # Express router endpoints
 ```
 
 ### Database Schema
@@ -202,18 +203,23 @@ DATABASE_URL=postgresql://admin:admin123@localhost:5432/academic_db
 1. **Define shared types** in `packages/common/src/index.ts` using Zod
 2. **Create Drizzle models** in `packages/backend/src/entities/{entity}/model.ts`
 3. **Implement services** in `packages/backend/src/entities/{entity}/service.ts`
-4. **Create tRPC routers** in `packages/backend/src/entities/{entity}/router.ts`
-5. **Use in frontend** with full type safety via the tRPC client
+4. **Create Express routers** in `packages/backend/src/entities/{entity}/router.ts`
+5. **Use in frontend** with axios and TanStack Query
 
 Example:
 
 ```typescript
 // In frontend components
-import { trpc } from './App';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+
+const api = axios.create({ baseURL: 'http://localhost:3000/api' });
 
 function MyComponent() {
-  // Fully typed, autocomplete works!
-  const { data: students } = trpc.students.list.useQuery();
+  const { data: students } = useQuery({
+    queryKey: ['students'],
+    queryFn: () => api.get('/students').then(res => res.data),
+  });
   // ...
 }
 ```
