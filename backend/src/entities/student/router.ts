@@ -1,13 +1,16 @@
-import { initTRPC } from '@trpc/server';
+import express from 'express';
 import { studentService } from './service.js';
 
-const t = initTRPC.create();
+const router = express.Router();
 
-export const studentRouter = t.router({
-  list: t.procedure.query(async () => {
+// GET /api/students - List all students
+router.get('/', async (_req, res) => {
+  try {
     const students = await studentService.list();
-    return students;
-  }),
+    res.json(students);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch students' });
+  }
 });
 
-export type StudentRouter = typeof studentRouter;
+export { router as studentRouter };

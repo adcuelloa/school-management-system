@@ -1,10 +1,9 @@
-import { initTRPC } from '@trpc/server';
+import express from 'express';
 import { studentRouter } from './entities/student/router.js';
 
-const t = initTRPC.create();
+const router = express.Router();
 
-export const appRouter = t.router({
-  students: studentRouter,
-});
+// Mount student routes
+router.use('/students', studentRouter);
 
-export type AppRouter = typeof appRouter;
+export { router as appRouter };

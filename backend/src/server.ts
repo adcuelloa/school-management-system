@@ -1,14 +1,12 @@
 import express from 'express';
 import cors from 'cors';
-import { createExpressMiddleware } from '@trpc/server/adapters/express';
-import { appRouter } from './router.js';
 import { config } from 'dotenv';
+import { studentRouter } from './entities/student/router.js';
 
 // Load environment variables
-config({ path: '../../infra/.env.example' });
-
+config();
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT ?? 3000;
 
 // Middleware
 app.use(cors());
@@ -19,18 +17,11 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// tRPC endpoint
-app.use(
-  '/trpc',
-  createExpressMiddleware({
-    router: appRouter,
-    createContext: () => ({}),
-  })
-);
+// API routes
+app.use('/api/students', studentRouter);
 
 export function startServer() {
   app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📡 tRPC endpoint: http://localhost:${PORT}/trpc`);
+    console.log(`📡 API endpoints: http://localhost:${PORT}/api`);
   });
 }

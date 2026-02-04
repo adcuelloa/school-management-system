@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { httpBatchLink } from '@trpc/client';
-import { createTRPCReact } from '@trpc/react-query';
-import type { AppRouter } from '@academic/backend';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import {
   BarChart,
   Bar,
@@ -15,36 +13,33 @@ import {
 } from 'recharts';
 import type { Student } from '@academic/common';
 
-// Create tRPC React hooks
-export const trpc = createTRPCReact<AppRouter>() as ReturnType<typeof createTRPCReact<AppRouter>>;
+// API client
+const api = axios.create({
+  baseURL: 'http://localhost:3000/api',
+});
 
 function App() {
   const [queryClient] = useState(() => new QueryClient());
-  const [trpcClient] = useState(() =>
-    trpc.createClient({
-      links: [
-        httpBatchLink({
-          url: 'http://localhost:4000/trpc',
-        }),
-      ],
-    })
-  );
 
   return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <div style={{ padding: '20px', fontFamily: 'system-ui, sans-serif' }}>
-          <h1>Academic Management System</h1>
-          <StudentDashboard />
-        </div>
-      </QueryClientProvider>
-    </trpc.Provider>
+    <QueryClientProvider client={queryClient}>
+      <div style={{ padding: '20px', fontFamily: 'system-ui, sans-serif' }}>
+        <h1>Academic Management System</h1>
+        <StudentDashboard />
+      </div>
+    </QueryClientProvider>
   );
 }
 
 function StudentDashboard() {
-  // Using tRPC to fetch students with end-to-end type safety
-  const { data: students, isLoading, error } = trpc.students.list.useQuery();
+  // Using axios to fetch students
+  const { data: students, isLoading, error } = useQuery({
+    queryKey: ['students'],
+    queryFn: async () => {
+      const response = await api.get<Student[]>('/students');
+      return response.data;
+    },
+  });
 
   if (isLoading) {
     return <div>Loading students...</div>;
