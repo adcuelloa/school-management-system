@@ -30,17 +30,22 @@
   // === Files Config ===
   "files.associations": {
     "*.mjs": "javascript",
-    "*.cjs": "javascript"
+    "*.cjs": "javascript",
+    "*.css": "tailwindcss"
   },
   "files.eol": "\n",
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true,
+
+  // === Tailwind CSS Config ===
+  "tailwindCSS.classFunctions": ["tw", "clsx", "tw\\.[a-z-]+"],
 
   // === JavaScript/TypeScript Config ===
   "javascript.updateImportsOnFileMove.enabled": "always",
   "typescript.updateImportsOnFileMove.enabled": "always",
 
   // === Overrides específicos ===
+  "prettier.documentSelectors": ["**/*.astro"],
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -48,11 +53,64 @@
     "files.trimTrailingWhitespace": false
   },
   "[astro]": {
-    "editor.defaultFormatter": "astro-build.astro-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
 
   // === Otras Configuraciones ===
   "editor.fontFamily": "Cascadia Code, Consolas, 'Courier New', monospace",
   "editor.wordWrap": "on",
-  "git.autofetch": true
+  "git.autofetch": true,
+  "[sql]": {
+    "editor.defaultFormatter": "ms-ossdata.vscode-pgsql"
+  },
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+
+  // === NestJS File Icons ===
+  "symbols.files.associations": {
+    "*.module.ts": "nest",
+    "*.controller.ts": "nest-controller",
+    "*.service.ts": "nest-service",
+    "*.guard.ts": "nest-guard",
+    "*.interceptor.ts": "nest-interceptor",
+    "*.filter.ts": "nest-filter",
+    "*.pipe.ts": "nest-pipe",
+    "*.middleware.ts": "nest-middleware",
+    "*.cookie.ts": "nest-middleware",
+    "*.gateway.ts": "nest-gateway",
+    "*.decorator.ts": "nest-decorator",
+    "*.dto.ts": "typescript",
+    "*.entity.ts": "database",
+    "*.interface.ts": "typescript-def",
+    "*.spec.ts": "test-ts",
+    "nest-app.ts": "nest",
+    "app.module.ts": "nest"
+  },
+
+  // === TypeScript para NestJS ===
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.importModuleSpecifier": "shortest",
+  "typescript.preferences.importModuleSpecifierEnding": "minimal",
+
+  // === Exclusiones de búsqueda ===
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.turbo": true,
+    "**/logs": true,
+    "pnpm-lock.yaml": true
+  },
+
+  // === Exclusiones de watcher ===
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/.turbo/**": true,
+    "**/logs/**": true
+  }
 }

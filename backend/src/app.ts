@@ -1,3 +1,4 @@
+import cors from "cors";
 import express, { type NextFunction, type Request, type Response } from "express";
 
 import AppRoutes from "./app.routes.js";
@@ -10,6 +11,7 @@ await checkConnection();
 const app = express();
 
 // Middleware básico
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

@@ -21,7 +21,6 @@
     "db:migrate": "tsx node_modules/drizzle-kit/bin.cjs migrate",
     "db:push": "tsx node_modules/drizzle-kit/bin.cjs push",
     "db:studio": "tsx node_modules/drizzle-kit/bin.cjs studio",
-    "db:reset": "../scripts/db-init.sh",
     "logs:clear": "rm -rf logs/*.log",
     "clean": "pnpm run logs:clear && rm -rf node_modules dist tsconfig.tsbuildinfo",
     "lint": "eslint .",
