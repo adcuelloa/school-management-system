@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { type FormEvent, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -13,13 +13,21 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { calificacionesApi, estudiantesApi, evaluacionesApi } from "@/lib/api";
+import {
+  asignaturasApi,
+  calificacionesApi,
+  estudiantesApi,
+  evaluacionesApi,
+  gradoAsignaturasApi,
+  gradosApi,
+} from "@/lib/api";
 
 import type { CreateCalificacion } from "@academic/common";
 
 export default function CalificacionesPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   const { data: calificaciones = [], isLoading } = useQuery({
     queryKey: ["calificaciones"],
@@ -32,6 +40,18 @@ export default function CalificacionesPage() {
   const { data: evaluaciones = [] } = useQuery({
     queryKey: ["evaluaciones"],
     queryFn: evaluacionesApi.list,
+  });
+  const { data: gradoAsignaturas = [] } = useQuery({
+    queryKey: ["grado-asignaturas"],
+    queryFn: gradoAsignaturasApi.list,
+  });
+  const { data: grados = [] } = useQuery({
+    queryKey: ["grados"],
+    queryFn: gradosApi.list,
+  });
+  const { data: asignaturas = [] } = useQuery({
+    queryKey: ["asignaturas"],
+    queryFn: asignaturasApi.list,
   });
 
   const createMutation = useMutation({
@@ -53,6 +73,28 @@ export default function CalificacionesPage() {
     };
     createMutation.mutate(data);
   };
+
+  const getEstudianteNombre = (id: number) => {
+    const est = estudiantes.find((e) => e.id === id);
+    return est ? `${est.nombres} ${est.apellidos}` : `#${id}`;
+  };
+
+  const getEvaluacionLabel = (id: number) => {
+    const ev = evaluaciones.find((e) => e.id === id);
+    if (!ev) return `#${id}`;
+    const ga = gradoAsignaturas.find((g) => g.id === ev.idGradoAsignatura);
+    const grado = ga ? grados.find((g) => g.id === ga.idGrado) : null;
+    const asig = ga ? asignaturas.find((a) => a.id === ga.idAsignatura) : null;
+    return `${ev.tipo} – ${grado?.nombre ?? "?"} / ${asig?.nombre ?? "?"}`;
+  };
+
+  const filtered = calificaciones.filter((c) => {
+    const term = search.toLowerCase();
+    return (
+      getEstudianteNombre(c.idEstudiante).toLowerCase().includes(term) ||
+      getEvaluacionLabel(c.idEvaluacion).toLowerCase().includes(term)
+    );
+  });
 
   return (
     <div className="max-w-7xl mx-auto flex flex-col gap-6">
@@ -96,11 +138,16 @@ export default function CalificacionesPage() {
                   className="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs"
                 >
                   <option value="">Seleccionar...</option>
-                  {evaluaciones.map((ev) => (
-                    <option key={ev.id} value={ev.id}>
-                      {ev.tipo} - {ev.fecha}
-                    </option>
-                  ))}
+                  {evaluaciones.map((ev) => {
+                    const ga = gradoAsignaturas.find((g) => g.id === ev.idGradoAsignatura);
+                    const grado = ga ? grados.find((g) => g.id === ga.idGrado) : null;
+                    const asig = ga ? asignaturas.find((a) => a.id === ga.idAsignatura) : null;
+                    return (
+                      <option key={ev.id} value={ev.id}>
+                        {ev.tipo} – {grado?.nombre ?? "?"} / {asig?.nombre ?? "?"} ({ev.fecha})
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
               <div className="space-y-2">
@@ -124,14 +171,26 @@ export default function CalificacionesPage() {
         </Dialog>
       </div>
 
+      <Card className="p-4">
+        <div className="relative flex-1 min-w-75">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Input
+            className="pl-10"
+            placeholder="Buscar por estudiante o evaluación"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </Card>
+
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-muted/50 border-b text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                 <th className="px-4 py-4">ID</th>
-                <th className="px-4 py-4">ID Estudiante</th>
-                <th className="px-4 py-4">ID Evaluación</th>
+                <th className="px-4 py-4">Estudiante</th>
+                <th className="px-4 py-4">Evaluación</th>
                 <th className="px-4 py-4">Valor</th>
                 <th className="px-4 py-4">Observaciones</th>
                 <th className="px-4 py-4">Fecha Registro</th>
@@ -144,20 +203,20 @@ export default function CalificacionesPage() {
                     Cargando...
                   </td>
                 </tr>
-              ) : calificaciones.length === 0 ? (
+              ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                     No hay calificaciones registradas.
                   </td>
                 </tr>
               ) : (
-                calificaciones.map((c) => (
+                filtered.map((c) => (
                   <tr key={c.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-4 font-medium">{c.id}</td>
-                    <td className="px-4 py-4">{c.idEstudiante}</td>
-                    <td className="px-4 py-4">{c.idEvaluacion}</td>
+                    <td className="px-4 py-4 font-mono text-xs">{c.id}</td>
+                    <td className="px-4 py-4 font-medium">{getEstudianteNombre(c.idEstudiante)}</td>
+                    <td className="px-4 py-4">{getEvaluacionLabel(c.idEvaluacion)}</td>
                     <td className="px-4 py-4 font-bold">{c.valor}</td>
-                    <td className="px-4 py-4">{c.observaciones ?? "—"}</td>
+                    <td className="px-4 py-4 text-muted-foreground">{c.observaciones ?? "—"}</td>
                     <td className="px-4 py-4">{c.fechaRegistro}</td>
                   </tr>
                 ))

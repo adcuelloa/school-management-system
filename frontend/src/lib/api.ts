@@ -66,4 +66,10 @@ export const gradoAsignaturasApi = buildCrud<GradoAsignatura, CreateGradoAsignat
 export const docenteAsignaturasApi = buildCrud<DocenteAsignatura, CreateDocenteAsignatura>("/docente-asignaturas");
 export const acudienteEstudiantesApi = buildCrud<AcudienteEstudiante, CreateAcudienteEstudiante>("/acudiente-estudiantes");
 
+// ─── Auth ─────────────────────────────────────────────────────
+export const authApi = {
+  login: (username: string, password: string) =>
+    api.post("/auth/login", { username, password }).then((r) => r.data),
+};
+
 export default api;

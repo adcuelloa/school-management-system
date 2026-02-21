@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Search } from "lucide-react";
-import {type FormEvent, useState } from "react";
+import { type FormEvent, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,28 +14,29 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { acudientesApi, tiposDocumentoApi } from "@/lib/api";
+import { rolesApi, usuariosApi } from "@/lib/api";
 
-import type { CreateAcudiente } from "@academic/common";
+import type { CreateUsuario } from "@academic/common";
 
-export default function AcudientesPage() {
+export default function UsuariosPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
 
-  const { data: acudientes = [], isLoading } = useQuery({
-    queryKey: ["acudientes"],
-    queryFn: acudientesApi.list,
+  const { data: usuarios = [], isLoading } = useQuery({
+    queryKey: ["usuarios"],
+    queryFn: usuariosApi.list,
   });
-  const { data: tiposDoc = [] } = useQuery({
-    queryKey: ["tipos-documento"],
-    queryFn: tiposDocumentoApi.list,
+
+  const { data: roles = [] } = useQuery({
+    queryKey: ["roles"],
+    queryFn: rolesApi.list,
   });
 
   const createMutation = useMutation({
-    mutationFn: acudientesApi.create,
+    mutationFn: usuariosApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["acudientes"] });
+      queryClient.invalidateQueries({ queryKey: ["usuarios"] });
       setOpen(false);
     },
   });
@@ -43,41 +44,47 @@ export default function AcudientesPage() {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const data: CreateAcudiente = {
-      idTipoDocumento: Number(fd.get("idTipoDocumento")),
-      numeroDocumento: fd.get("numeroDocumento") as string,
-      genero: fd.get("genero") as string,
+    const data: CreateUsuario = {
+      username: fd.get("username") as string,
+      password: fd.get("password") as string,
       nombres: fd.get("nombres") as string,
       apellidos: fd.get("apellidos") as string,
-      telefono: (fd.get("telefono") as string) || null,
-      correo: (fd.get("correo") as string) || null,
+      idRol: Number(fd.get("idRol")),
     };
     createMutation.mutate(data);
   };
 
-  const filtered = acudientes.filter(
-    (a) =>
-      a.nombres.toLowerCase().includes(search.toLowerCase()) ||
-      a.apellidos.toLowerCase().includes(search.toLowerCase())
+  const filtered = usuarios.filter(
+    (u) =>
+      u.username.toLowerCase().includes(search.toLowerCase()) ||
+      u.nombres.toLowerCase().includes(search.toLowerCase()) ||
+      u.apellidos.toLowerCase().includes(search.toLowerCase()),
   );
+
+  const getRolNombre = (idRol: number) => {
+    const rol = roles.find((r) => r.id === idRol);
+    return rol?.nombre ?? "—";
+  };
 
   return (
     <div className="max-w-7xl mx-auto flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gestión de Acudientes</h1>
-          <p className="text-muted-foreground">Ver y gestionar los acudientes registrados.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Gestión de Usuarios</h1>
+          <p className="text-muted-foreground">
+            Crear y administrar usuarios del sistema con sus roles.
+          </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="size-4 mr-2" />
-              Crear Acudiente
+              Crear Usuario
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>Nuevo Acudiente</DialogTitle>
+              <DialogTitle>Nuevo Usuario</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
@@ -92,47 +99,28 @@ export default function AcudientesPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Tipo Documento *</Label>
-                  <select
-                    name="idTipoDocumento"
-                    required
-                    className="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs"
-                  >
-                    <option value="">Seleccionar...</option>
-                    {tiposDoc.map((td) => (
-                      <option key={td.id} value={td.id}>
-                        {td.abreviatura} - {td.nombre}
-                      </option>
-                    ))}
-                  </select>
+                  <Label>Usuario *</Label>
+                  <Input name="username" required />
                 </div>
                 <div className="space-y-2">
-                  <Label>Nro. Documento *</Label>
-                  <Input name="numeroDocumento" required />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Género *</Label>
-                  <select
-                    name="genero"
-                    required
-                    className="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs"
-                  >
-                    <option value="">Seleccionar...</option>
-                    <option value="Masculino">Masculino</option>
-                    <option value="Femenino">Femenino</option>
-                    <option value="Otro">Otro</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Teléfono</Label>
-                  <Input name="telefono" />
+                  <Label>Contraseña *</Label>
+                  <Input name="password" type="password" required />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Correo</Label>
-                <Input name="correo" type="email" />
+                <Label>Rol *</Label>
+                <select
+                  name="idRol"
+                  required
+                  className="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs"
+                >
+                  <option value="">Seleccionar rol...</option>
+                  {roles.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.nombre}
+                    </option>
+                  ))}
+                </select>
               </div>
               {createMutation.isError && (
                 <p className="text-sm text-destructive">
@@ -140,7 +128,7 @@ export default function AcudientesPage() {
                 </p>
               )}
               <Button type="submit" disabled={createMutation.isPending} className="w-full">
-                {createMutation.isPending ? "Guardando..." : "Guardar Acudiente"}
+                {createMutation.isPending ? "Guardando..." : "Guardar Usuario"}
               </Button>
             </form>
           </DialogContent>
@@ -152,7 +140,7 @@ export default function AcudientesPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             className="pl-10"
-            placeholder="Buscar por nombre"
+            placeholder="Buscar por nombre o usuario"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -165,10 +153,10 @@ export default function AcudientesPage() {
             <thead>
               <tr className="bg-muted/50 border-b text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                 <th className="px-4 py-4">ID</th>
+                <th className="px-4 py-4">Usuario</th>
                 <th className="px-4 py-4">Nombres</th>
                 <th className="px-4 py-4">Apellidos</th>
-                <th className="px-4 py-4">Documento</th>
-                <th className="px-4 py-4">Teléfono</th>
+                <th className="px-4 py-4">Rol</th>
                 <th className="px-4 py-4">Estado</th>
               </tr>
             </thead>
@@ -182,20 +170,22 @@ export default function AcudientesPage() {
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                    No hay acudientes registrados.
+                    No hay usuarios registrados.
                   </td>
                 </tr>
               ) : (
-                filtered.map((a) => (
-                  <tr key={a.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-4 font-medium">{a.id}</td>
-                    <td className="px-4 py-4">{a.nombres}</td>
-                    <td className="px-4 py-4">{a.apellidos}</td>
-                    <td className="px-4 py-4 font-mono text-xs">{a.numeroDocumento}</td>
-                    <td className="px-4 py-4">{a.telefono ?? "—"}</td>
-                    <td className="px-4 py-4">
-                      <Badge variant={a.estado ? "default" : "secondary"}>
-                        {a.estado ? "Activo" : "Inactivo"}
+                filtered.map((u) => (
+                  <tr key={u.id} className="hover:bg-muted/50 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs">{u.id}</td>
+                    <td className="px-4 py-3 font-medium">{u.username}</td>
+                    <td className="px-4 py-3">{u.nombres}</td>
+                    <td className="px-4 py-3">{u.apellidos}</td>
+                    <td className="px-4 py-3">
+                      <Badge variant="outline">{getRolNombre(u.idRol)}</Badge>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge variant={u.estado ? "default" : "secondary"}>
+                        {u.estado ? "Activo" : "Inactivo"}
                       </Badge>
                     </td>
                   </tr>

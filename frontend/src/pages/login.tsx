@@ -1,15 +1,39 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
+import { authApi } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+
 import type { FormEvent } from "react";
+
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [username, setUsername] = useState("admin");
+  const [password, setPassword] = useState("admin123");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    navigate("/dashboard");
+    setError("");
+    setLoading(true);
+    try {
+      const user = await authApi.login(username, password);
+      login(user);
+      navigate("/dashboard");
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "response" in err) {
+        const resp = err as { response?: { data?: { error?: string } } };
+        setError(resp.response?.data?.error ?? "Error de autenticación");
+      } else {
+        setError("No se pudo conectar con el servidor");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,13 +77,20 @@ export default function LoginPage() {
           </div>
 
           <form className="flex flex-col gap-5" onSubmit={handleLogin}>
+            {error && (
+              <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {error}
+              </div>
+            )}
+
             <label className="flex flex-col gap-1.5">
               <span className="text-sm font-medium">Usuario</span>
               <input
                 className="flex h-12 w-full rounded-lg border bg-muted/30 px-4 text-base placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder="Ingresa tu usuario"
                 type="text"
-                defaultValue="admin"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </label>
 
@@ -70,7 +101,8 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   className="flex h-12 w-full rounded-lg border bg-muted/30 px-4 text-base placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   placeholder="Ingresa tu contraseña"
-                  defaultValue="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   onClick={() => setShowPassword(!showPassword)}
@@ -83,10 +115,11 @@ export default function LoginPage() {
             </label>
 
             <button
-              className="mt-2 flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="mt-2 flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-primary px-4 text-sm font-bold text-primary-foreground transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               type="submit"
+              disabled={loading}
             >
-              Iniciar Sesión
+              {loading ? "Ingresando..." : "Iniciar Sesión"}
             </button>
           </form>
 

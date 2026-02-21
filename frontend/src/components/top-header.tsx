@@ -1,6 +1,14 @@
 import { Bell } from "lucide-react";
 
+import { useAuth } from "@/lib/auth-context";
+
 export function TopHeader() {
+  const { user } = useAuth();
+
+  const initials = user
+    ? `${user.nombres.charAt(0)}${user.apellidos.charAt(0)}`.toUpperCase()
+    : "??";
+
   return (
     <header className="flex-none z-50 w-full bg-card border-b px-6 py-3">
       <div className="flex items-center justify-between">
@@ -37,11 +45,11 @@ export function TopHeader() {
           </button>
           <div className="flex items-center gap-3 pl-6 border-l">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-semibold">Maria Gonzales</p>
-              <p className="text-xs text-muted-foreground">Rectoría / Admin</p>
+              <p className="text-sm font-semibold">{user ? `${user.nombres} ${user.apellidos}` : "—"}</p>
+              <p className="text-xs text-muted-foreground">{user?.rol?.nombre ?? "Sin rol"}</p>
             </div>
             <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm border-2 border-background shadow-sm">
-              MG
+              {initials}
             </div>
           </div>
         </div>

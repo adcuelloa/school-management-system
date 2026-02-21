@@ -14,28 +14,29 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { areasApi, asignaturasApi } from "@/lib/api";
+import { gradosApi, gruposApi } from "@/lib/api";
 
-import type { CreateAsignatura } from "@academic/common";
+import type { CreateGrupo } from "@academic/common";
 
-export default function AsignaturasPage() {
+export default function GruposPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
 
-  const { data: asignaturas = [], isLoading } = useQuery({
-    queryKey: ["asignaturas"],
-    queryFn: asignaturasApi.list,
+  const { data: grupos = [], isLoading } = useQuery({
+    queryKey: ["grupos"],
+    queryFn: gruposApi.list,
   });
-  const { data: areas = [] } = useQuery({
-    queryKey: ["areas"],
-    queryFn: areasApi.list,
+
+  const { data: grados = [] } = useQuery({
+    queryKey: ["grados"],
+    queryFn: gradosApi.list,
   });
 
   const createMutation = useMutation({
-    mutationFn: asignaturasApi.create,
+    mutationFn: gruposApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["asignaturas"] });
+      queryClient.invalidateQueries({ queryKey: ["grupos"] });
       setOpen(false);
     },
   });
@@ -43,61 +44,66 @@ export default function AsignaturasPage() {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const data: CreateAsignatura = {
-      idArea: Number(fd.get("idArea")),
-      nombre: fd.get("nombre") as string,
+    const data: CreateGrupo = {
+      idGrado: Number(fd.get("idGrado")),
       codigo: fd.get("codigo") as string,
+      anioLectivo: fd.get("anioLectivo") as string,
     };
     createMutation.mutate(data);
   };
 
-  const filtered = asignaturas.filter(
-    (a) =>
-      a.nombre.toLowerCase().includes(search.toLowerCase()) ||
-      a.codigo.toLowerCase().includes(search.toLowerCase())
+  const getGradoNombre = (idGrado: number) => {
+    const grado = grados.find((g) => g.id === idGrado);
+    return grado ? `${grado.nombre} (${grado.nivel})` : "—";
+  };
+
+  const filtered = grupos.filter((g) =>
+    g.codigo.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <div className="max-w-7xl mx-auto flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gestión de Asignaturas</h1>
-          <p className="text-muted-foreground">Ver y gestionar las asignaturas del colegio.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Gestión de Grupos</h1>
+          <p className="text-muted-foreground">Administrar los grupos por grado y año lectivo.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="size-4 mr-2" />
-              Crear Asignatura
+              Crear Grupo
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Nueva Asignatura</DialogTitle>
+              <DialogTitle>Nuevo Grupo</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label>Nombre *</Label>
-                <Input name="nombre" required placeholder="Matemáticas" />
-              </div>
-              <div className="space-y-2">
-                <Label>Código *</Label>
-                <Input name="codigo" required placeholder="MAT101" />
-              </div>
-              <div className="space-y-2">
-                <Label>Área *</Label>
+                <Label>Grado *</Label>
                 <select
-                  name="idArea"
+                  name="idGrado"
                   required
                   className="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs"
                 >
-                  <option value="">Seleccionar...</option>
-                  {areas.map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.nombre}
+                  <option value="">Seleccionar grado...</option>
+                  {grados.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.nombre} ({g.nivel})
                     </option>
                   ))}
                 </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Código *</Label>
+                  <Input name="codigo" required placeholder="Ej: A, B" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Año Lectivo *</Label>
+                  <Input name="anioLectivo" required placeholder="Ej: 2025" />
+                </div>
               </div>
               {createMutation.isError && (
                 <p className="text-sm text-destructive">
@@ -105,7 +111,7 @@ export default function AsignaturasPage() {
                 </p>
               )}
               <Button type="submit" disabled={createMutation.isPending} className="w-full">
-                {createMutation.isPending ? "Guardando..." : "Guardar Asignatura"}
+                {createMutation.isPending ? "Guardando..." : "Guardar Grupo"}
               </Button>
             </form>
           </DialogContent>
@@ -113,11 +119,11 @@ export default function AsignaturasPage() {
       </div>
 
       <Card className="p-4">
-        <div className="relative flex-1 min-w-75">
+        <div className="relative flex-1 min-w-[300px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             className="pl-10"
-            placeholder="Buscar por nombre o código"
+            placeholder="Buscar por código"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -130,9 +136,9 @@ export default function AsignaturasPage() {
             <thead>
               <tr className="bg-muted/50 border-b text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                 <th className="px-4 py-4">ID</th>
-                <th className="px-4 py-4">Nombre</th>
                 <th className="px-4 py-4">Código</th>
-                <th className="px-4 py-4">ID Área</th>
+                <th className="px-4 py-4">Grado</th>
+                <th className="px-4 py-4">Año Lectivo</th>
                 <th className="px-4 py-4">Estado</th>
               </tr>
             </thead>
@@ -146,19 +152,19 @@ export default function AsignaturasPage() {
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                    No hay asignaturas registradas.
+                    No hay grupos registrados.
                   </td>
                 </tr>
               ) : (
-                filtered.map((a) => (
-                  <tr key={a.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-4 font-medium">{a.id}</td>
-                    <td className="px-4 py-4">{a.nombre}</td>
-                    <td className="px-4 py-4 font-mono text-xs">{a.codigo}</td>
-                    <td className="px-4 py-4">{a.idArea}</td>
-                    <td className="px-4 py-4">
-                      <Badge variant={a.estado ? "default" : "secondary"}>
-                        {a.estado ? "Activa" : "Inactiva"}
+                filtered.map((g) => (
+                  <tr key={g.id} className="hover:bg-muted/50 transition-colors">
+                    <td className="px-4 py-3 font-mono text-xs">{g.id}</td>
+                    <td className="px-4 py-3 font-medium">{g.codigo}</td>
+                    <td className="px-4 py-3">{getGradoNombre(g.idGrado)}</td>
+                    <td className="px-4 py-3">{g.anioLectivo}</td>
+                    <td className="px-4 py-3">
+                      <Badge variant={g.estado ? "default" : "secondary"}>
+                        {g.estado ? "Activo" : "Inactivo"}
                       </Badge>
                     </td>
                   </tr>

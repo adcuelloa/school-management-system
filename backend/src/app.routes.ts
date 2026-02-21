@@ -10,6 +10,7 @@ import { acudienteRouter } from "./entities/acudiente/router.js";
 import { acudienteEstudianteRouter } from "./entities/acudiente-estudiante/router.js";
 import { areaRouter } from "./entities/area/router.js";
 import { asignaturaRouter } from "./entities/asignatura/router.js";
+import { authRouter } from "./entities/auth/router.js";
 import { calificacionRouter } from "./entities/calificacion/router.js";
 import { docenteRouter } from "./entities/docente/router.js";
 import { docenteAsignaturaRouter } from "./entities/docente-asignatura/router.js";
@@ -39,6 +40,7 @@ router.use((req: Request, _res: Response, next) => {
 /**
  * API Routes
  */
+router.use("/api/auth", authRouter);
 router.use("/api/estudiantes", studentRouter);
 router.use("/api/tipos-documento", tipoDocumentoRouter);
 router.use("/api/roles", rolRouter);

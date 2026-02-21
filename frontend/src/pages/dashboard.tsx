@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   BarChart3,
+  BookOpen,
   ClipboardList,
   FileText,
   GraduationCap,
@@ -12,9 +13,14 @@ import { Link } from "react-router";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { docentesApi, estudiantesApi, matriculasApi } from "@/lib/api";
+import { docentesApi, estudiantesApi, evaluacionesApi, matriculasApi } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const rolName = user?.rol?.nombre?.toLowerCase() ?? "";
+  const isAdmin = rolName === "admin";
+
   const { data: estudiantes = [] } = useQuery({
     queryKey: ["estudiantes"],
     queryFn: estudiantesApi.list,
@@ -22,13 +28,19 @@ export default function DashboardPage() {
   const { data: docentes = [] } = useQuery({
     queryKey: ["docentes"],
     queryFn: docentesApi.list,
+    enabled: isAdmin,
   });
   const { data: matriculas = [] } = useQuery({
     queryKey: ["matriculas"],
     queryFn: matriculasApi.list,
+    enabled: isAdmin,
+  });
+  const { data: evaluaciones = [] } = useQuery({
+    queryKey: ["evaluaciones"],
+    queryFn: evaluacionesApi.list,
   });
 
-  const stats = [
+  const adminStats = [
     {
       title: "Total Estudiantes",
       value: estudiantes.length,
@@ -51,6 +63,25 @@ export default function DashboardPage() {
       bg: "bg-orange-50",
     },
   ];
+
+  const docenteStats = [
+    {
+      title: "Estudiantes",
+      value: estudiantes.length,
+      icon: Users,
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+    },
+    {
+      title: "Evaluaciones",
+      value: evaluaciones.length,
+      icon: ClipboardList,
+      color: "text-green-600",
+      bg: "bg-green-50",
+    },
+  ];
+
+  const stats = isAdmin ? adminStats : docenteStats;
 
   return (
     <div className="max-w-6xl mx-auto flex flex-col gap-10">
@@ -92,59 +123,109 @@ export default function DashboardPage() {
       <div>
         <h2 className="tracking-tight text-xl font-bold mb-5">Accesos Rápidos</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Link
-            to="/estudiantes/crear"
-            className="group flex flex-col items-start gap-4 p-6 rounded-xl bg-card border hover:border-primary transition-all shadow-sm hover:shadow-md text-left"
-          >
-            <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors text-primary">
-              <UserPlus className="size-6" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-1">Registrar Estudiante</h3>
-              <p className="text-muted-foreground text-sm">
-                Agregar un nuevo perfil de estudiante a la base de datos.
-              </p>
-            </div>
-          </Link>
-          <Link
-            to="/calificaciones"
-            className="group flex flex-col items-start gap-4 p-6 rounded-xl bg-card border hover:border-primary transition-all shadow-sm hover:shadow-md text-left"
-          >
-            <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors text-primary">
-              <ClipboardList className="size-6" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-1">Calificaciones</h3>
-              <p className="text-muted-foreground text-sm">
-                Configurar un nuevo examen o periodo de calificación.
-              </p>
-            </div>
-          </Link>
-          <Link
-            to="/matriculas"
-            className="group flex flex-col items-start gap-4 p-6 rounded-xl bg-card border hover:border-primary transition-all shadow-sm hover:shadow-md text-left"
-          >
-            <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors text-primary">
-              <BarChart3 className="size-6" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-1">Gestionar Matrículas</h3>
-              <p className="text-muted-foreground text-sm">
-                Administrar matrículas del año lectivo actual.
-              </p>
-            </div>
-          </Link>
+          {isAdmin ? (
+            <>
+              <Link
+                to="/estudiantes"
+                className="group flex flex-col items-start gap-4 p-6 rounded-xl bg-card border hover:border-primary transition-all shadow-sm hover:shadow-md text-left"
+              >
+                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors text-primary">
+                  <UserPlus className="size-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Registrar Estudiante</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Agregar un nuevo perfil de estudiante a la base de datos.
+                  </p>
+                </div>
+              </Link>
+              <Link
+                to="/evaluaciones"
+                className="group flex flex-col items-start gap-4 p-6 rounded-xl bg-card border hover:border-primary transition-all shadow-sm hover:shadow-md text-left"
+              >
+                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors text-primary">
+                  <ClipboardList className="size-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Evaluaciones</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Gestionar evaluaciones por grado y asignatura.
+                  </p>
+                </div>
+              </Link>
+              <Link
+                to="/matriculas"
+                className="group flex flex-col items-start gap-4 p-6 rounded-xl bg-card border hover:border-primary transition-all shadow-sm hover:shadow-md text-left"
+              >
+                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors text-primary">
+                  <BarChart3 className="size-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Gestionar Matrículas</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Administrar matrículas del año lectivo actual.
+                  </p>
+                </div>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/evaluaciones"
+                className="group flex flex-col items-start gap-4 p-6 rounded-xl bg-card border hover:border-primary transition-all shadow-sm hover:shadow-md text-left"
+              >
+                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors text-primary">
+                  <ClipboardList className="size-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Mis Evaluaciones</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Ver y crear evaluaciones para tus asignaturas.
+                  </p>
+                </div>
+              </Link>
+              <Link
+                to="/calificaciones"
+                className="group flex flex-col items-start gap-4 p-6 rounded-xl bg-card border hover:border-primary transition-all shadow-sm hover:shadow-md text-left"
+              >
+                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors text-primary">
+                  <BarChart3 className="size-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Calificaciones</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Registrar notas de tus estudiantes.
+                  </p>
+                </div>
+              </Link>
+              <Link
+                to="/asignaturas"
+                className="group flex flex-col items-start gap-4 p-6 rounded-xl bg-card border hover:border-primary transition-all shadow-sm hover:shadow-md text-left"
+              >
+                <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors text-primary">
+                  <BookOpen className="size-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Mis Asignaturas</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Consultar las asignaturas asignadas.
+                  </p>
+                </div>
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Recent enrollments */}
-      <div>
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="tracking-tight text-xl font-bold">Matrículas Recientes</h2>
-          <Link to="/matriculas" className="text-primary text-sm font-semibold hover:underline">
-            Ver Todo
-          </Link>
-        </div>
+      {/* Recent enrollments - Admin only */}
+      {isAdmin && (
+        <div>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="tracking-tight text-xl font-bold">Matrículas Recientes</h2>
+            <Link to="/matriculas" className="text-primary text-sm font-semibold hover:underline">
+              Ver Todo
+            </Link>
+          </div>
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -182,6 +263,7 @@ export default function DashboardPage() {
           </div>
         </Card>
       </div>
+      )}
     </div>
   );
 }

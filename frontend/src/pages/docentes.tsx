@@ -160,7 +160,7 @@ export default function DocentesPage() {
       </div>
 
       <Card className="p-4">
-        <div className="relative flex-1 min-w-[300px]">
+        <div className="relative flex-1 min-w-75">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             className="pl-10"
