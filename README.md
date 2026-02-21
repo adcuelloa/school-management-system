@@ -65,20 +65,20 @@ La interfaz y las acciones variarán según el rol asignado.
 
 ```mermaid
 flowchart LR
-  A[Usuario] -->|login| B{Rol asignado}
+  A[Usuario] -->|login| B{"Rol asignado"}
   B --> C[Administrador]
   B --> D[Docente]
   B --> E[Acudiente]
 
-  C --> C1[Usuarios y Roles]
-  C --> C2[Configuración Académica]
-  C --> C3[Estudiantes y Matrículas]
+  C --> C1["Usuarios y Roles"]
+  C --> C2["Configuración Académica"]
+  C --> C3["Estudiantes y Matrículas"]
 
-  D --> D1[Mis Asignaturas]
+  D --> D1["Mis Asignaturas"]
   D --> D2[Evaluaciones]
   D --> D3[Calificaciones]
 
-  E --> E1[Ver Progreso del Estudiante]
+  E --> E1["Ver Progreso del Estudiante"]
 ```
 
 ### Administrador
@@ -119,16 +119,16 @@ Pasos rápidos:
 
 ```mermaid
 flowchart TD
-  A[Inicio: Menú Estudiantes] --> B[Click "Nuevo Estudiante"]
-  B --> C[Completar Información Personal]
-  C --> D[Completar Documento]
-  D --> E{Asignar acudiente?}
-  E -->|Sí| F[Buscar acudiente y seleccionar]
-  E -->|No| G[Advertencia: crear acudiente primero]
-  F --> H[Asignar grupo/matrícula]
-  H --> I[Guardar registro]
-  G --> Z[Crear acudiente → volver a asignar]
-  I --> J[Fin: Estudiante creado]
+  A["Inicio: Menú Estudiantes"] --> B["Click Nuevo Estudiante"]
+  B --> C["Completar Información Personal"]
+  C --> D["Completar Documento"]
+  D --> E{"Asignar acudiente?"}
+  E -->|Sí| F["Buscar acudiente y seleccionar"]
+  E -->|No| G["Advertencia: crear acudiente primero"]
+  F --> H["Asignar grupo/matrícula"]
+  H --> I["Guardar registro"]
+  G --> Z["Crear acudiente → volver a asignar"]
+  I --> J["Fin: Estudiante creado"]
 ```
 
 ### Editar / Ver ficha del estudiante
@@ -186,7 +186,7 @@ sequenceDiagram
   participant Docente
   participant Sistema
   Docente->>Sistema: Abrir formulario "Nueva Evaluación"
-  Docente->>Sistema: Enviar (asignatura, grupo, tipo, fecha, %)
+  Docente->>Sistema: Enviar (asignatura, grupo, tipo, fecha, porcentaje)
   Sistema-->>Docente: Confirmación & evaluación creada
   Docente->>Sistema: Publicar evaluación (opcional)
   Sistema-->>Docente: Evaluación visible para el grupo
